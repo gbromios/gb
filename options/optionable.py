@@ -73,7 +73,7 @@ class Optionable(object):
 		cls.mark_subclass_registered_options(repr(cls))
 
 	@staticmethod
-	def register_option_global(options):
+	def register_options_global(options):
 		if Optionable.Opts:
 			raise ValueError('%s already has already loaded options!'\
 			                  % (repr(Optionable),))
