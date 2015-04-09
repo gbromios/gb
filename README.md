@@ -31,6 +31,8 @@ sports = {
 }
 
 ```
+they are options objects which basically turn into dicts, and can be attached to
+Optionable subclasses or made global or passed around in whichever manner you prefer.
 
 the whitespace is simple, so you can get a tiny bit fancier with layout
 but it's not really meant for anything beyond simple config files
