@@ -180,11 +180,10 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 		"""return a dict of postdata"""
 		content_type = self.headers.getheader('content-type')
 
-		raw = self.rfile.read(content_length)
-		if content_type == 'application/x-www-form-urlencoded':
+		if 'application/x-www-form-urlencoded' in content_type:
 			return self._query_string_to_dict(self.rfile.read(content_length))
 
-		elif content_type == 'application/json':
+		elif 'application/json' in content_type:
 			return json.loads(self.rfile.read(content_length))
 
 		else:
