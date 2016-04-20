@@ -12,6 +12,7 @@ class Reply(object):
 	@classmethod
 	def text(cls, code, body, content_type="text/plain", headers={}):
 		"""any plaintext reply should eventualy use this method"""
+		
 		headers['content-type'] = content_type
 		# does this need to be a thing py3 or can it stay VV
 		headers['content-length'] = len(body.encode('utf-8'))
@@ -21,12 +22,12 @@ class Reply(object):
 	def json(cls, code, data, headers={}, encoder=None):
 		"""accepts a json-serializable data object"""
 		body = json.dumps(data, indent=4, sort_keys=True)
-		return cls.text(code, body, "application/json", headers)
+		return cls.text(code, body, "application/json; charset=utf-8", headers)
 
 	@classmethod
 	def filename(cls, filename, headers={}):
 		"""plop in a filename to send its contents as an http reply
-		TODO: should be able to pass a code for Reply.filename()
+		TODO: should be able to pass a code for Reply.filename(self):
 		"""
 		try:
 			with open(filename, 'rb') as f:
