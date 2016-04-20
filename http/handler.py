@@ -156,7 +156,6 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 	@staticmethod
 	def _qs_pair_to_py(k, v):
 		if k.endswith('[]'):
-			print 'yes list'
 			return (
 				k.rstrip('[]'), (
 					[Handler._qs_arg_to_py(arg) for arg in v]
