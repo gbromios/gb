@@ -10,7 +10,7 @@ gb.http
 
 Lightweight http server, good for quick protypes/small projects
 
- - check http/test.py to see a small illustration of adding routes and running
+ - check `http/test/` to see a small illustration of adding routes and running
    a server
 
  - see https://docs.python.org/2/library/basehttpserver.html to look at
