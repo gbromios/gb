@@ -115,24 +115,45 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 	@property
 	def request_data(self):
 		if self._request_data is None:
-			self._request_data = self._parse_request_data()
+			self._request_data = self._parse_request()
 		return self._request_data
 
-	def _parse_request_data(self):
-		# the path may contain a query:
-		# POST requests may have a body:
-		content_length = int(self.headers.getheader('content-length') or 0)
+	@property
+	def raw_data(self):
+		# sorta like request_type, if no body is evident, assume that its a query
+		# string, since it'll still work if there's neither.
+		if self.request_length:
+			return self.rfile.read(self.request_length)
+		else:
+			return urlparse.urlparse(self.path).query or ''
 
-		# a body indicates postdata
-		if content_length:
-			return self._parse_request_body(content_length)
+	@property
+	def request_type(self):
+		# if there's a given content-type, that's that, but absent a content-type,
+		# just assume there's an empty body, and any data will be urlencoded. this
+		# fails gracefully if there's neither, less finicky than more exact methods
+		return self.headers.getheader('content-type') or 'application/x-www-form-urlencoded'
 
-		# no body, try to decode the url query
-		elif urlparse.urlparse(self.path).query:
-			return self._query_string_to_dict(urlparse.urlparse(self.path).query)
+	@property
+	def request_length(self):
+		# same as request_type, see above
+		try:
+			return int(self.headers.getheader('content-length'))
+
+		except TypeError, ValueError:
+			return 0
+
+	def _parse_request(self):
+		"""return a dict of postdata"""
+		# fairly lazy/imprecise, but works perfectly for the current need
+		if 'application/x-www-form-urlencoded' in self.request_type:
+			return self._query_string_to_dict(self.raw_data)
+
+		elif 'application/json' in self.request_type:
+			return json.loads(self.raw_data)
 
 		else:
-			return {}
+			raise ValueError("406: bad content-type {0}".format(content_type))
 
 	@property
 	def split_path(self):
@@ -174,20 +195,6 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 			return int(v)
 		except:
 			return str(v)
-
-	def _parse_request_body(self, content_length):
-		"""return a dict of postdata"""
-		content_type = self.headers.getheader('content-type')
-
-		if 'application/x-www-form-urlencoded' in content_type:
-			return self._query_string_to_dict(self.rfile.read(content_length))
-
-		elif 'application/json' in content_type:
-			return json.loads(self.rfile.read(content_length))
-
-		else:
-			raise ValueError("406: bad content-type {0}".format(content_type))
-
 
 	def send_http_reply(self, http_reply):
 		""" sends response code, http headers and body back to client

@@ -21,7 +21,7 @@ class Reply(object):
 	@classmethod
 	def json(cls, code, data, headers={}, encoder=None):
 		"""accepts a json-serializable data object"""
-		body = json.dumps(data, indent=4, sort_keys=True)
+		body = json.dumps(data)
 		return cls.text(code, body, "application/json; charset=utf-8", headers)
 
 	@classmethod
