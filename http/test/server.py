@@ -63,6 +63,12 @@ class FHandler(Handler):
 		except ValueError:
 			return Reply.text(400, "can only embiggen existing foos, never shrink")
 
+class BHandler(Handler):
+	@route('GET', '.*', -1)
+	def get_catchall(self):
+		return Reply.text(200, "AINT ME GOT NO {0}".format(self.path))
+
+
 
 if __name__ == '__main__':
 	Server(('0.0.0.0',2799), FHandler).serve_forever()
