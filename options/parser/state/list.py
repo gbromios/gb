@@ -12,6 +12,7 @@ class ReadList(ParserState):
 
 		elif LIST_END(c):
 			self.stream.burn()
+			self.data = tuple(self.data)
 			return None
 
 		else:
