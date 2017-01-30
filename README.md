@@ -26,16 +26,17 @@ some_setting = "500 degrees"
 another_thing = bills_house
 authorized_users = [ rusty_s, p_willeaux, tony_p ]
 sports = {
-	base = ball,
-	tenn = is
+	points_scored = 99
+	average_cheering = 3.6
+	largest_fellow = "Big Tony"
 }
 
 ```
-they are options objects which basically turn into dicts, and can be attached to
-Optionable subclasses or made global or passed around in whichever manner you prefer.
 
-the whitespace is simple, so you can get a tiny bit fancier with layout
-but it's not really meant for anything beyond simple config files
+still a work in progress though if you put the above string into `gb.options.parser.parse`
+it comes out looking exactly how you'd expect. using it for parsing anything more
+complicated just goes against the spirit of the thing.
+
 
 gb.daemon
 ---------

@@ -2,6 +2,11 @@ from gb.options.parser.state.base import ParserState, ParserError, UnmatchedChar
 
 from gb.options.parser.token import *
 
+import re
+
+FLOAT_RE = re.compile('^[\\d]*\\.[\\d]+$')
+INT_RE   = re.compile('^[\\d]+$')
+
 class ReadScalar(ParserState):
 	# only reads first char, then delegates
 	def _run(self, c):
@@ -69,7 +74,7 @@ class ReadScalarUQ(ParserState):
 
 		# unescaped whitespace or comma will end an unquoted scalar
 		elif WHITESPACE(c):
-			print 'end scalar_u'
+			self.parse_type()
 			return None
 
 		# p much anything else if fair game
@@ -79,7 +84,21 @@ class ReadScalarUQ(ParserState):
 
 		else:
 			# could result in a hard to diagnose syntax error, but thems the breaks
+			self.parse_type()
 			return None
+
+	def parse_type(self):
+		# unquoted scalars can be ints or floats or strings or null!
+		data = self.data
+		if data == 'null' or data == 'None':
+			self.data = None
+
+		elif FLOAT_RE.match(data):
+			self.data = float(data)
+
+		elif INT_RE.match(data):
+			self.data = int(data)
+
 
 	def resume(self, data):
 		raise ParserError('scalars should never start other states!')
