@@ -22,8 +22,6 @@ class ReadObject(ParserState):
 			else:
 				raise
 
-		print " > '{0}' <".format(c)
-
 		if WHITESPACE(c) or KVP_END(c):
 			# ignore whitespace... and commas for now...?
 			self.stream.burn()

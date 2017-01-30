@@ -27,13 +27,10 @@ class StateMachine(object):
 		x = 0
 		while True:
 			x += 1
-			print "-- {0} --".format(x)
 			next_state = self.current_state.run()
-			print " - current state {0} has data '{1}'".format(self.current_state.__class__.__name__, self.current_state.data)
 
 			if next_state is None:
 				# return to the prior state
-				print ' - finished with current state!'
 				last_state = self.pop_state()
 				while True:
 					if self.current_state is None:
@@ -50,11 +47,9 @@ class StateMachine(object):
 							last_state = self.pop_state()
 
 			elif next_state is self.current_state:
-				print ' - keep current state -'
 				pass
 
 			elif isinstance(next_state, State):
-				print ' - goto new state type', next_state.__class__.__name__
 				self.current_state = next_state
 
 
