@@ -4,6 +4,10 @@ import os.path
 class Options(object):
 	_config_dir = None
 
+	def _dump(self):
+		import json
+		print json.dumps(json.loads(dict(self)), indent=2, sort_keys=True)
+
 	def __init__(self, data):
 		self._options = data
 

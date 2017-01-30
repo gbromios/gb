@@ -1,8 +1,8 @@
-from parser import parse
-from odict import ODict
-from option import Options
+from gb.options.parser import parse
+from gb.options.odict import ODict
+from gb.options.option import Options
 
-import sys
+import gb.options.test
 
 def deep_cmp(a, b, wsl=0, name='', delim='  '):
 	# definitely need to be the same type of thing!
@@ -73,72 +73,69 @@ def deep_cmp(a, b, wsl=0, name='', delim='  '):
 
 	return True
 
-try:
-	filename = sys.argv[1]
-	deep = False
 
-except IndexError:
-	filename = 'sample.conf'
-	deep = True
+# if the parsing was a success, it should be exactly the same as our ODict
+parsed_odict  = parse(open(gb.options.test.sample_path).read())
+literal_odict = ODict(
+	cool_dude = "wat",
+	steven = "collins",
+	hello = "kitty,\" ?",
+	puppies ='\\n\\n cute',
+	puppies_2 = "even more PuPpIeS",
+	tony_pepperony = "522",
+	bloopers = "5120\nasdsaf\n\tblah blah. there's quoites, so it doesn't care about \"white\" space???",
+	query = "avg # of number of head kicks per karate tournament (this isn't a comment btw)",
+	things = [
+		"1",
+		"2",
+		"watlol",
+		"xen_is_best",
+		"no",
+		"kvm",
+		"me",
+		"too",
+		"thanks",
+		"whatever",
+		"dude"
+	],
+	umm = [
+		"ahem",
+		"excuse me",
+		"thank's",
+		"your welcome",
+		"beg your pardon"
+	],
+	perfect_system = dict(
+		ayy = "lmao",
+		can_hold = "0",
+		why = "????",
+		temperature = "100.04",
+		those_one_guys_ya_know = [
+			dict(
+				name = "doge",
+				mean = "sometimes",
+				rules = "venice",
+				tryhard = "0"
+			),
+			dict(
+				name = "tony",
+				mean = "very",
+				kicks = "frequently",
+				tryhard = "45"
+			),
+			dict(
+				name = "Unicorn Rodeo",
+				occupation = "JAMES C. UNICORN",
+				tryhard = "999",
+				mean = "never",
+			)
+		]
+	)
+)
 
-a = parse(open(filename).read())
-if deep:
-	deep_cmp(a, ODict(
-		cool_dude = "wat",
-		steven = "collins",
-		hello = "kitty,\" ?",
-		puppies ='\\n\\n cute',
-		puppies_2 = "even more PuPpIeS",
-		tony_pepperony = "522",
-		bloopers = "5120\nasdsaf\n\tblah blah. there's quoites, so it doesn't care about \"white\" space???",
-		query = "avg # of number of head kicks per karate tournament (this isn't a comment btw)",
-		things = [
-			"1",
-			"2",
-			"watlol",
-			"xen_is_best",
-			"no",
-			"kvm",
-			"me",
-			"too",
-			"thanks",
-			"whatever",
-			"dude"
-		],
-		umm = [
-			"ahem",
-			"excuse me",
-			"thank's",
-			"your welcome",
-			"beg your pardon"
-		],
-		perfect_system = dict(
-			ayy = "lmao",
-			can_hold = "0",
-			why = "????",
-			temperature = "100.04",
-			those_one_guys_ya_know = [
-				dict(
-					name = "doge",
-					mean = "sometimes",
-					rules = "venice",
-					tryhard = "0"
-				),
-				dict(
-					name = "tony",
-					mean = "very",
-					kicks = "frequently",
-					tryhard = "45"
-				),
-				dict(
-					name = "Unicorn Rodeo",
-					occupation = "JAMES C. UNICORN",
-					tryhard = "999",
-					mean = "never",
-				)
-			]
-		)
-	))
 
-o = Options(a)
+deep_cmp(parsed_odict, literal_odict)
+
+# no errors loading a parsed ODict into an Options either
+o = Options(parsed_odict)
 
