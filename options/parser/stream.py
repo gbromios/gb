@@ -1,3 +1,5 @@
+from gb.options.parser.error import StreamEOF
+
 class Stream(object):
 	def __init__(self, raw_data):
 		self.raw_data = raw_data
@@ -6,7 +8,7 @@ class Stream(object):
 	@property
 	def last(self):
 		if self.i >= len(self.raw_data):
-			raise IndexError("end of stream reached!")
+			raise StreamEOF("end of stream reached!")
 		return self.raw_data[self.i]
 
 	def pop(self):

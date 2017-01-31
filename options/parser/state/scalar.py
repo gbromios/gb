@@ -1,5 +1,5 @@
 from gb.options.parser.state.base import ParserState
-from gb.options.parser.state.error import StateTransitionError, UnmatchedCharError
+from gb.options.parser.error import StateTransitionError, UnmatchedCharError, StreamEOF
 
 from gb.options.parser.token import *
 
@@ -71,7 +71,11 @@ class ReadScalarQQ(ParserState):
 class ReadScalarUQ(ParserState):
 	data_type = str
 	def run(self):
-		c = self.stream.last
+		try:
+			c = self.stream.last
+		except StreamEOF:
+			return None
+
 		if ESCAPE(c):
 			# for now, just accept the next char, no matter what it is.
 			self.stream.pop()

@@ -1,5 +1,5 @@
 from gb.options.parser.state.base import ParserState
-from gb.options.parser.state.error import InvalidValueError, UnmatchedCharError
+from gb.options.parser.error import InvalidValueError, UnmatchedCharError, StreamEOF
 import gb.options.parser.state.value
 
 from gb.options.parser.token import *
@@ -9,11 +9,6 @@ from gb.options.parser.token import *
 class ReadObject(ParserState):
 	data_type = dict
 
-	def __init__(self, stream, top_level = False):
-		super(ReadObject, self).__init__(stream)
-		# are we looking for } or an eof? for now, probably doesn matter heh
-		self.top_level = top_level
-
 	def run(self):
 		c = self.stream.last
 		if WHITESPACE(c) or KVP_END(c):
@@ -21,7 +16,7 @@ class ReadObject(ParserState):
 			self.stream.pop()
 			return self
 
-		elif not self.top_level and OBJECT_END(c):
+		elif OBJECT_END(c):
 			# done reading this object
 			self.stream.pop()
 			return None
@@ -46,6 +41,16 @@ class ReadObject(ParserState):
 		# deal with duplicates?
 		self.data[data.key] = data.value
 		return True
+
+# hm.... not sure if I love this...
+class ReadObjectTop(ReadObject):
+	def run(self):
+		try:
+			self.stream.last
+		except StreamEOF:
+			return None
+		else:
+			super(ReadObjectTop, self).__init__()
 
 class KVP(object):
 	def __init__(self):
