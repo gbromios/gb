@@ -13,7 +13,8 @@ class ReadObject(ParserState):
 		# are we looking for } or an eof? for now, probably doesn matter heh
 		self.top_level = top_level
 
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if WHITESPACE(c) or KVP_END(c):
 			# ignore whitespace... and commas for now...?
 			self.stream.pop()
@@ -57,7 +58,8 @@ class ReadKey(ParserState):
 		return False
 
 class ReadKeyU(ReadKey):
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		# we can only get here from IDENTIFIER_START, so we can just check IDENTIFIER
 		if IDENTIFIER(c):
 			self.data.key += self.stream.pop()
@@ -74,7 +76,8 @@ class ReadKeyU(ReadKey):
 
 
 class ReadKeyQ(ReadKey):
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if IDENTIFIER(c):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
@@ -91,7 +94,8 @@ class ReadKeyQ(ReadKey):
 
 
 class ReadKeyQQ(ReadKey):
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if IDENTIFIER(c):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
@@ -109,7 +113,8 @@ class ReadKeyQQ(ReadKey):
 
 class ReadKVPSep(ParserState):
 	_data_set = False # unnecessary if value cant be None, but idk about that
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		# if our data is set, we're looking for A) a comma or B) the end of our object
 		if self._data_set:
 			if WHITESPACE(c):

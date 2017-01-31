@@ -9,7 +9,8 @@ INT_RE   = re.compile('^[\\d]+$')
 
 class ReadScalar(ParserState):
 	# only reads first char, then delegates
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		# will never be whitespace afaict?
 		# single quote, double quote, or OTHER
 
@@ -26,7 +27,8 @@ class ReadScalar(ParserState):
 
 class ReadScalarQ(ParserState):
 	data_type = str
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if Q(c):
 			self.stream.pop()
 			return None
@@ -46,7 +48,8 @@ class ReadScalarQ(ParserState):
 
 class ReadScalarQQ(ParserState):
 	data_type = str
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if QQ(c):
 			self.stream.pop()
 			return None
@@ -66,7 +69,8 @@ class ReadScalarQQ(ParserState):
 
 class ReadScalarUQ(ParserState):
 	data_type = str
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if ESCAPE(c):
 			# for now, just accept the next char, no matter what it is.
 			self.stream.pop()

@@ -9,19 +9,6 @@ class ParserState(gb.state.State):
 	# but right now hard coding what I need is probably more sane... there's still
 	# some easy wins here... maybe.
 
-	def _run(self, c):
-		raise NotImplemented
-
-	def run(self):
-		# pretty much every parser state wants to know what the next char is
-		# if we hit eof: just end like crazy? probably parse will fail but whatever
-		try:
-			c = self.stream.last
-		except IndexError:
-			return None
-
-		return self._run(c)
-
 	def resume(self, data):
 		'''default is to blindly pass the data up. be careful..'''
 		self.data = data

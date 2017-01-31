@@ -6,7 +6,8 @@ import gb.options.parser.state.list
 from gb.options.parser.token import *
 
 class ReadValue(ParserState):
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if WHITESPACE(c):
 			self.stream.pop()
 			return self

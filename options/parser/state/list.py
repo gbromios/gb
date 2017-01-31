@@ -5,7 +5,8 @@ from gb.options.parser.token import *
 
 class ReadList(ParserState):
 	data_type = list
-	def _run(self, c):
+	def run(self):
+		c = self.stream.last
 		if WHITESPACE(c) or LIST_SEP(c):
 			self.stream.pop()
 			return self
