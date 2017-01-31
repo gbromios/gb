@@ -32,8 +32,7 @@ class StateMachine(object):
 				while True:
 					if self.current_state is None:
 						# out of states, we did it
-						self.final_state = last_state
-						return
+						return last_state.data
 
 					else:
 						# resume == True, continue running states as normal

@@ -1,12 +1,18 @@
-import gb.state
 import gb.options.parser.stream
-import gb.options.parser.state.init
+from gb.state import StateMachine
+from gb.options.parser.state.format import FindFormat
 
-def parse(raw_data):
+def find_format(raw_data):
 	stream = gb.options.parser.stream.Stream(raw_data)
-	init = gb.options.parser.state.init.Init(stream)
-	machine = gb.state.StateMachine(init)
+	return StateMachine(FindFormat()).run(stream)
 
-	machine.run()
+def parse(raw_data, InitState = None):
+	stream = gb.options.parser.stream.Stream(raw_data)
 
-	return machine.final_state.data
+	InitState = InitState if InitState else find_format(raw_data)
+
+	if InitState is not None:
+		return StateMachine(InitState()).run(stream)
+	else:
+		raise Exception("couldn't figure out the format of this file")
+

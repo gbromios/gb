@@ -1,26 +1,3 @@
-''' Token Types:
- W   : "whitespace" space, tab, newline, etc. most stuff ignores this.
- N   : "newline" i.e. "\\n et al"
- SS  : "scalar start" pretty much any non-whitespace character except "{}[],="
- SUQ : "scalar un-quoted character" a scalar that ends with whitespace or ,
- SSQ : "scalar single quoted" anything but an un-escaped single quote
- SDQ : "scalar dobule quoted" same as above, but for double quote
- Q   : a single quote
- QQ  : a double quote
- E   : "escape char" i.e. \\, but does not include \\\\. (forces peeking-ahead?)
- ESQ : escape char + Q
- EDQ : escape char + QQ
- OS  : "object start" i.e. "{"
- OE  : "object end" i.e. "}"
- KVS : "key-value-pair separator" i.e. "="
- KVE : "key-value-pair end" i.e. ","
- IS  : "identifier-start" valid python name starters i.e. "[_a-zA-Z]"
- IC  : "identifier-character" valid postpositive characters for python names i.e. "[_a-zA-Z0-9]"
- LS  : "list start" i.e. "["
- LE  : "list end" i.e. "]"
- LI  : "list item separator" i.e. ","
-'''
-
 import re
 
 class Token(object):
@@ -42,6 +19,8 @@ class All(Token):
 
 WHITESPACE = Token('\s', '"whitespace" space, tab, newline, etc. most stuff ignores this.')
 NEWLINE = Token('\n', '"newline" i.e. "\\n et al"')
+EOF = Token('\x03', 'EOF sent by stream reader')
+
 SCALAR = Token('[^\[\]\{\},=]', '"scalar start" pretty much any non-whitespace character except {}[],=')
 
 Q = Token('\'', 'a single quote')

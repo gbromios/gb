@@ -7,22 +7,22 @@ import gb.options.parser.state.list
 from gb.options.parser.token import *
 
 class ReadValue(ParserState):
-	def run(self):
-		c = self.stream.last
+	def run(self, stream):
+		c = stream.last
 		if WHITESPACE(c):
-			self.stream.pop()
+			stream.pop()
 			return self
 
 		elif OBJECT_START(c):
-			self.stream.pop()
-			return gb.options.parser.state.object.ReadObject(self.stream)
+			stream.pop()
+			return gb.options.parser.state.object.ReadObject()
 
 		elif LIST_START(c):
-			self.stream.pop()
-			return gb.options.parser.state.list.ReadList(self.stream)
+			stream.pop()
+			return gb.options.parser.state.list.ReadList()
 
 		elif SCALAR(c): # anything but syntax tbh
-			return gb.options.parser.state.scalar.ReadScalar(self.stream)
+			return gb.options.parser.state.scalar.ReadScalar()
 
 		else:
 			raise UnmatchedCharError(c, [WHITESPACE, OBJECT_START, LIST_START, SCALAR])

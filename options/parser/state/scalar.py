@@ -1,6 +1,6 @@
 from gb.options.parser.state.base import ParserState
-from gb.options.parser.error import StateTransitionError, UnmatchedCharError, StreamEOF
 
+from gb.options.parser.error import *
 from gb.options.parser.token import *
 
 import re
@@ -10,38 +10,45 @@ INT_RE   = re.compile('^[\\d]+$')
 
 class ReadScalar(ParserState):
 	# only reads first char, then delegates
-	def run(self):
-		c = self.stream.last
+	def run(self, stream):
+		c = stream.last
 		# will never be whitespace afaict?
 		# single quote, double quote, or OTHER
 
 		if Q(c):
-			self.stream.pop()
-			return ReadScalarQ(self.stream)
+			stream.pop()
+			return ReadScalarQ()
 
 		elif QQ(c):
-			self.stream.pop()
-			return ReadScalarQQ(self.stream)
+			stream.pop()
+			return ReadScalarQQ()
 
 		else:
-			return ReadScalarUQ(self.stream)
+			return ReadScalarUQ()
 
 class ReadScalarQ(ParserState):
 	data_type = str
-	def run(self):
-		c = self.stream.last
-		if Q(c):
-			self.stream.pop()
+	def run(self, stream):
+		c = stream.last
+		if NEWLINE(c):
+			# mostly because it theoretically makes parsing comments hard
+			raise IllegalNewline
+
+		elif EOF(c):
+			raise IllegalEOF
+
+		elif Q(c):
+			stream.pop()
 			return None
 
 		elif ESCAPE(c):
 			# for now, just accept the next char, no matter what it is.
-			self.stream.pop()
-			self.data += self.stream.pop()
+			stream.pop()
+			self.data += stream.pop()
 			return self
 
 		else:
-			self.data += self.stream.pop()
+			self.data += stream.pop()
 			return self
 
 	def resume(self, data):
@@ -49,19 +56,25 @@ class ReadScalarQ(ParserState):
 
 class ReadScalarQQ(ParserState):
 	data_type = str
-	def run(self):
-		c = self.stream.last
-		if QQ(c):
-			self.stream.pop()
+	def run(self, stream):
+		c = stream.last
+		if NEWLINE(c):
+			raise IllegalNewline
+
+		elif EOF(c):
+			raise IllegalEOF
+
+		elif QQ(c):
+			stream.pop()
 			return None
 
 		elif ESCAPE(c):
-			self.stream.pop()
-			self.data += self.stream.pop()
+			stream.pop()
+			self.data += stream.pop()
 			return self
 
 		else:
-			self.data += self.stream.pop()
+			self.data += stream.pop()
 			return self
 
 
@@ -70,16 +83,17 @@ class ReadScalarQQ(ParserState):
 
 class ReadScalarUQ(ParserState):
 	data_type = str
-	def run(self):
-		try:
-			c = self.stream.last
-		except StreamEOF:
+	def run(self, stream):
+		c = stream.last
+
+		if EOF(c):
+			self.parse_type()
 			return None
 
 		if ESCAPE(c):
 			# for now, just accept the next char, no matter what it is.
-			self.stream.pop()
-			self.data += self.stream.pop()
+			stream.pop()
+			self.data += stream.pop()
 
 		# unescaped whitespace or comma will end an unquoted scalar
 		elif WHITESPACE(c):
@@ -88,7 +102,7 @@ class ReadScalarUQ(ParserState):
 
 		# p much anything else if fair game
 		elif SCALAR(c):
-			self.data += self.stream.pop()
+			self.data += stream.pop()
 			return self
 
 		else:

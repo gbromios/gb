@@ -8,30 +8,29 @@ from gb.options.parser.token import *
 # actually for now, just require commas.... bloobloobloo
 class ReadObject(ParserState):
 	data_type = dict
-
-	def run(self):
-		c = self.stream.last
+	def run(self, stream):
+		c = stream.last
 		if WHITESPACE(c) or KVP_END(c):
 			# ignore whitespace... and commas for now...?
-			self.stream.pop()
+			stream.pop()
 			return self
 
 		elif OBJECT_END(c):
 			# done reading this object
-			self.stream.pop()
+			stream.pop()
 			return None
 
 		elif IDENTIFIER_START(c):
 			# no pop
-			return ReadKeyU(self.stream)
+			return ReadKeyU()
 
 		elif Q(c):
-			self.stream.pop()
-			return ReadKeyU(self.stream)
+			stream.pop()
+			return ReadKeyU()
 
 		elif QQ(c):
-			self.stream.pop()
-			return ReadKeyU(self.stream)
+			stream.pop()
+			return ReadKeyU()
 
 		else:
 			raise UnmatchedCharError(c, [WHITESPACE, OBJECT_END, IDENTIFIER_START, Q, QQ])
@@ -42,15 +41,34 @@ class ReadObject(ParserState):
 		self.data[data.key] = data.value
 		return True
 
-# hm.... not sure if I love this...
 class ReadObjectTop(ReadObject):
-	def run(self):
-		try:
-			self.stream.last
-		except StreamEOF:
+	data_type = dict
+	def run(self, stream):
+		c = stream.last
+		if WHITESPACE(c) or KVP_END(c):
+			stream.pop()
+			return self
+
+		elif EOF(c):
 			return None
+
+		elif IDENTIFIER_START(c):
+			return ReadKeyU()
+
+		elif Q(c):
+			stream.pop()
+			return ReadKeyU()
+
+		elif QQ(c):
+			stream.pop()
+			return ReadKeyU()
+
 		else:
-			super(ReadObjectTop, self).__init__()
+			raise UnmatchedCharError(c, [WHITESPACE, OBJECT_END, IDENTIFIER_START, Q, QQ])
+
+	def resume(self, data):
+		self.data[data.key] = data.value
+		return True
 
 class KVP(object):
 	def __init__(self):
@@ -64,16 +82,16 @@ class ReadKey(ParserState):
 		return False
 
 class ReadKeyU(ReadKey):
-	def run(self):
-		c = self.stream.last
+	def run(self, stream):
+		c = stream.last
 		# we can only get here from IDENTIFIER_START, so we can just check IDENTIFIER
 		if IDENTIFIER(c):
-			self.data.key += self.stream.pop()
+			self.data.key += stream.pop()
 			return self
 
 		elif WHITESPACE(c) or KVP_SEP(c):
 			if self.data.key:
-				return ReadKVPSep(self.stream)
+				return ReadKVPSep()
 			else:
 				raise InvalidValueError('invalid key: empty identifier!')
 
@@ -82,36 +100,36 @@ class ReadKeyU(ReadKey):
 
 
 class ReadKeyQ(ReadKey):
-	def run(self):
-		c = self.stream.last
+	def run(self, stream):
+		c = stream.last
 		if IDENTIFIER(c):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
 				raise InvalidValueError('Identifier can only start [_a-zA-Z]')
-			self.data.key += self.stream.pop()
+			self.data.key += stream.pop()
 			return self
 
 		# key ends with a single quote
 		elif Q(c):
-			self.stream.pop()
+			stream.pop()
 
 		else:
 			raise UnmatchedCharError(c, [Q, IDENTIFIER])
 
 
 class ReadKeyQQ(ReadKey):
-	def run(self):
-		c = self.stream.last
+	def run(self, stream):
+		c = stream.last
 		if IDENTIFIER(c):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
 				raise InvalidValueError('Identifier can only start [_a-zA-Z]')
-			self.data.key += self.stream.pop()
+			self.data.key += stream.pop()
 			return self
 
 		# key ends with a single quote
 		elif QQ(c):
-			self.stream.pop()
+			stream.pop()
 
 		else:
 			raise UnmatchedCharError(c, [QQ, IDENTIFIER])
@@ -119,16 +137,16 @@ class ReadKeyQQ(ReadKey):
 
 class ReadKVPSep(ParserState):
 	_data_set = False # unnecessary if value cant be None, but idk about that
-	def run(self):
-		c = self.stream.last
+	def run(self, stream):
+		c = stream.last
 		# if our data is set, we're looking for A) a comma or B) the end of our object
 		if self._data_set:
 			if WHITESPACE(c):
-				self.stream.pop()
+				stream.pop()
 				return self
 
 			elif KVP_END(c):
-				self.stream.pop()
+				stream.pop()
 				return None
 
 			elif OBJ_END(c):
@@ -139,12 +157,12 @@ class ReadKVPSep(ParserState):
 
 		else:
 			if WHITESPACE(c):
-				self.stream.pop()
+				stream.pop()
 				return self
 
 			elif KVP_SEP(c):
-				self.stream.pop()
-				return gb.options.parser.state.value.ReadValue(self.stream)
+				stream.pop()
+				return gb.options.parser.state.value.ReadValue()
 
 			else:
 				raise UnmatchedCharError(c, [WHITESPACE, KVP_SEP])

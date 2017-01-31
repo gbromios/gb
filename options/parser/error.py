@@ -1,8 +1,14 @@
+class StreamEOF(Exception):
+	'''raised when the stream hits its end'''
+
 class ParserError(Exception):
 	'''raise when u cant parse huehue'''
 
-class StreamEOF(ParserError):
-	'''raised when the stream hits its end'''
+class IllegalEOF(ParserError):
+	pass
+
+class IllegalNewline(ParserError):
+	pass
 
 class InvalidValueError(ParserError):
 	'''token matched, but the value was no good'''
