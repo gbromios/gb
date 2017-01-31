@@ -7,6 +7,9 @@ def find_format(raw_data):
 	return StateMachine(FindFormat()).run(stream)
 
 def parse(raw_data, InitState = None):
+	# strip out the comments... do it the lazy way for now
+	raw_data = '\n'.join(l for l in raw_data.split('\n') if not l.strip().startswith('#'))
+
 	stream = gb.options.parser.stream.Stream(raw_data)
 
 	InitState = InitState if InitState else find_format(raw_data)

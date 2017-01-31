@@ -126,6 +126,6 @@ class EmptyFile(ParserState):
 class LoneScalar(ParserState):
 	def run(self, stream):
 		self.data = stream._raw_data.strip()
-		if data[0] in "'\"":
+		if self.data[0] in "'\"":
 			self.data = self.data[1:-1]
 		return None
