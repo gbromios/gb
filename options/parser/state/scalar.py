@@ -14,11 +14,11 @@ class ReadScalar(ParserState):
 		# single quote, double quote, or OTHER
 
 		if Q(c):
-			self.stream.burn()
+			self.stream.pop()
 			return ReadScalarQ(self.stream)
 
 		elif QQ(c):
-			self.stream.burn()
+			self.stream.pop()
 			return ReadScalarQQ(self.stream)
 
 		else:
@@ -28,17 +28,17 @@ class ReadScalarQ(ParserState):
 	data_type = str
 	def _run(self, c):
 		if Q(c):
-			self.stream.burn()
+			self.stream.pop()
 			return None
 
 		elif ESCAPE(c):
 			# for now, just accept the next char, no matter what it is.
-			self.stream.burn()
-			self.data += self.stream.burn()
+			self.stream.pop()
+			self.data += self.stream.pop()
 			return self
 
 		else:
-			self.data += self.stream.burn()
+			self.data += self.stream.pop()
 			return self
 
 	def resume(self, data):
@@ -48,16 +48,16 @@ class ReadScalarQQ(ParserState):
 	data_type = str
 	def _run(self, c):
 		if QQ(c):
-			self.stream.burn()
+			self.stream.pop()
 			return None
 
 		elif ESCAPE(c):
-			self.stream.burn()
-			self.data += self.stream.burn()
+			self.stream.pop()
+			self.data += self.stream.pop()
 			return self
 
 		else:
-			self.data += self.stream.burn()
+			self.data += self.stream.pop()
 			return self
 
 
@@ -69,8 +69,8 @@ class ReadScalarUQ(ParserState):
 	def _run(self, c):
 		if ESCAPE(c):
 			# for now, just accept the next char, no matter what it is.
-			self.stream.burn()
-			self.data += self.stream.burn()
+			self.stream.pop()
+			self.data += self.stream.pop()
 
 		# unescaped whitespace or comma will end an unquoted scalar
 		elif WHITESPACE(c):
@@ -79,7 +79,7 @@ class ReadScalarUQ(ParserState):
 
 		# p much anything else if fair game
 		elif SCALAR(c):
-			self.data += self.stream.burn()
+			self.data += self.stream.pop()
 			return self
 
 		else:

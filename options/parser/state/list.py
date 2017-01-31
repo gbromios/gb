@@ -7,11 +7,11 @@ class ReadList(ParserState):
 	data_type = list
 	def _run(self, c):
 		if WHITESPACE(c) or LIST_SEP(c):
-			self.stream.burn()
+			self.stream.pop()
 			return self
 
 		elif LIST_END(c):
-			self.stream.burn()
+			self.stream.pop()
 			self.data = tuple(self.data)
 			return None
 

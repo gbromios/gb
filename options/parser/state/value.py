@@ -8,15 +8,15 @@ from gb.options.parser.token import *
 class ReadValue(ParserState):
 	def _run(self, c):
 		if WHITESPACE(c):
-			self.stream.burn()
+			self.stream.pop()
 			return self
 
 		elif OBJECT_START(c):
-			self.stream.burn()
+			self.stream.pop()
 			return gb.options.parser.state.object.ReadObject(self.stream)
 
 		elif LIST_START(c):
-			self.stream.burn()
+			self.stream.pop()
 			return gb.options.parser.state.list.ReadList(self.stream)
 
 		elif SCALAR(c): # anything but syntax tbh

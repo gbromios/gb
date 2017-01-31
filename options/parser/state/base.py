@@ -16,7 +16,7 @@ class ParserState(gb.state.State):
 		# pretty much every parser state wants to know what the next char is
 		# if we hit eof: just end like crazy? probably parse will fail but whatever
 		try:
-			c = self.stream.peek()
+			c = self.stream.last
 		except IndexError:
 			return None
 

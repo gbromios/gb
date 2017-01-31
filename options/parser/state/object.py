@@ -13,35 +13,27 @@ class ReadObject(ParserState):
 		# are we looking for } or an eof? for now, probably doesn matter heh
 		self.top_level = top_level
 
-	def run(self):
-		try:
-			c = self.stream.peek()
-		except IndexError:
-			if self.top_level:
-				return None
-			else:
-				raise
-
+	def _run(self, c):
 		if WHITESPACE(c) or KVP_END(c):
 			# ignore whitespace... and commas for now...?
-			self.stream.burn()
+			self.stream.pop()
 			return self
 
 		elif not self.top_level and OBJECT_END(c):
 			# done reading this object
-			self.stream.burn()
+			self.stream.pop()
 			return None
 
 		elif IDENTIFIER_START(c):
-			# no burn
+			# no pop
 			return ReadKeyU(self.stream)
 
 		elif Q(c):
-			self.stream.burn()
+			self.stream.pop()
 			return ReadKeyU(self.stream)
 
 		elif QQ(c):
-			self.stream.burn()
+			self.stream.pop()
 			return ReadKeyU(self.stream)
 
 		else:
@@ -68,7 +60,7 @@ class ReadKeyU(ReadKey):
 	def _run(self, c):
 		# we can only get here from IDENTIFIER_START, so we can just check IDENTIFIER
 		if IDENTIFIER(c):
-			self.data.key += self.stream.burn()
+			self.data.key += self.stream.pop()
 			return self
 
 		elif WHITESPACE(c) or KVP_SEP(c):
@@ -87,12 +79,12 @@ class ReadKeyQ(ReadKey):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
 				raise ParserError('Identifier can only start [_a-zA-Z]')
-			self.data.key += self.stream.burn()
+			self.data.key += self.stream.pop()
 			return self
 
 		# key ends with a single quote
 		elif Q(c):
-			self.stream.burn()
+			self.stream.pop()
 
 		else:
 			raise UnmatchedCharError(c, [Q, IDENTIFIER])
@@ -104,12 +96,12 @@ class ReadKeyQQ(ReadKey):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
 				raise ParserError('Identifier can only start [_a-zA-Z]')
-			self.data.key += self.stream.burn()
+			self.data.key += self.stream.pop()
 			return self
 
 		# key ends with a single quote
 		elif QQ(c):
-			self.stream.burn()
+			self.stream.pop()
 
 		else:
 			raise UnmatchedCharError(c, [QQ, IDENTIFIER])
@@ -121,11 +113,11 @@ class ReadKVPSep(ParserState):
 		# if our data is set, we're looking for A) a comma or B) the end of our object
 		if self._data_set:
 			if WHITESPACE(c):
-				self.stream.burn()
+				self.stream.pop()
 				return self
 
 			elif KVP_END(c):
-				self.stream.burn()
+				self.stream.pop()
 				return None
 
 			elif OBJ_END(c):
@@ -136,11 +128,11 @@ class ReadKVPSep(ParserState):
 
 		else:
 			if WHITESPACE(c):
-				self.stream.burn()
+				self.stream.pop()
 				return self
 
 			elif KVP_SEP(c):
-				self.stream.burn()
+				self.stream.pop()
 				return gb.options.parser.state.value.ReadValue(self.stream)
 
 			else:
