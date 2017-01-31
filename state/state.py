@@ -2,7 +2,6 @@ class StateMachine(object):
 	def __init__(self, initial_state):
 		self.states = [initial_state]
 		self.final_state = None # set this when finished.
-		self.started = False
 
 	@property
 	def current_state(self):
@@ -21,13 +20,11 @@ class StateMachine(object):
 		else:
 			raise IndexError("no states to pop!")
 
-	def run(self):
+	def run(self, data):
+		''' data := object to be passed into State.run each iteration '''
 		# could make this async with minimal work
-		self.started = True
-		x = 0
 		while True:
-			x += 1
-			next_state = self.current_state.run()
+			next_state = self.current_state.run(data)
 
 			if next_state is None:
 				# return to the prior state
@@ -62,8 +59,9 @@ class State(object):
 		else:
 			self.data = None
 
-	def run(self):
+	def run(self, data):
 		raise NotImplemented
+		''' data := object given to StateMachine.run()'''
 
 		# do some stuff, then return one of the following:
 		if "all done with this state":
