@@ -1,4 +1,5 @@
-from gb.options.parser.state.base import ParserState, ParserError, UnmatchedCharError
+from gb.options.parser.state.base import ParserState
+from gb.options.parser.state.error import InvalidValueError, UnmatchedCharError
 import gb.options.parser.state.value
 
 from gb.options.parser.token import *
@@ -69,7 +70,7 @@ class ReadKeyU(ReadKey):
 			if self.data.key:
 				return ReadKVPSep(self.stream)
 			else:
-				raise ParserError('invalid key: empty identifier!')
+				raise InvalidValueError('invalid key: empty identifier!')
 
 		else:
 			raise UnmatchedCharError(c, [IDENTIFIER, WHITESPACE, KVP_SEP])
@@ -81,7 +82,7 @@ class ReadKeyQ(ReadKey):
 		if IDENTIFIER(c):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
-				raise ParserError('Identifier can only start [_a-zA-Z]')
+				raise InvalidValueError('Identifier can only start [_a-zA-Z]')
 			self.data.key += self.stream.pop()
 			return self
 
@@ -99,7 +100,7 @@ class ReadKeyQQ(ReadKey):
 		if IDENTIFIER(c):
 			# if no key has been found yet, make sure initial char is valid
 			if not self.data.key and not IDENTIFIER_START(c):
-				raise ParserError('Identifier can only start [_a-zA-Z]')
+				raise InvalidValueError('Identifier can only start [_a-zA-Z]')
 			self.data.key += self.stream.pop()
 			return self
 

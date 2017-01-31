@@ -1,4 +1,5 @@
-from gb.options.parser.state.base import ParserState, ParserError, UnmatchedCharError
+from gb.options.parser.state.base import ParserState
+from gb.options.parser.state.error import StateTransitionError, UnmatchedCharError
 
 from gb.options.parser.token import *
 
@@ -44,7 +45,7 @@ class ReadScalarQ(ParserState):
 			return self
 
 	def resume(self, data):
-		raise ParserError('scalars should never start other states!')
+		raise StateTransitionError('scalars should never start other states!')
 
 class ReadScalarQQ(ParserState):
 	data_type = str
@@ -65,7 +66,7 @@ class ReadScalarQQ(ParserState):
 
 
 	def resume(self, data):
-		raise ParserError('scalars should never start other states!')
+		raise StateTransitionError('scalars should never start other states!')
 
 class ReadScalarUQ(ParserState):
 	data_type = str
@@ -105,5 +106,5 @@ class ReadScalarUQ(ParserState):
 
 
 	def resume(self, data):
-		raise ParserError('scalars should never start other states!')
+		raise StateTransitionError('scalars should never start other states!')
 

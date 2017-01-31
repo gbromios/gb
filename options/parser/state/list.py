@@ -1,4 +1,5 @@
-from gb.options.parser.state.base import ParserState, ParserError, UnmatchedCharError
+from gb.options.parser.state.base import ParserState
+
 import gb.options.parser.state.value
 
 from gb.options.parser.token import *
