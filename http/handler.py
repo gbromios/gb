@@ -1,4 +1,4 @@
-from router import Router
+from router import Router, Route
 from reply import Reply
 import BaseHTTPServer # kill in 3!
 import inspect
@@ -32,29 +32,25 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 		Just call it manually when ya start the server.
 		"""
 		found_routes = {}
-		# list of all @route methods:
-		for n, m in inspect.getmembers(cls, predicate=inspect.ismethod):
-			# method which has a route and needs to be registered:
-			if hasattr(m, '_http_method'):
-				hm = m._http_method
-				r = m._regex
-				p = m._priority
+		# e.g. { 'GET': [Route, Route], 'POST': [Route], ... }
+		# list of all route members:
+		is_route = lambda member: isinstance(member, Route)
+		for name, member in inspect.getmembers(cls, predicate=is_route):
 
-				#print n, hm, r, p, m.__name__
+			# since routes can be nested, find all the routes living under this one
+			# along with the actual instance method to be called.
+			nested_routes, original_method = member.all_routes
+			for route in nested_routes:
+				found_routes.setdefault(route.http_method, []).append(route)
 
-				if hm not in found_routes:
-						found_routes[hm] = []
-				found_routes[hm].append(m)
+			# replace the original method as well.
+			setattr(cls, name, original_method)
 
+		# once all the methods have been found and organized by http method,
+		for http_method, routes in found_routes.items():
+			cls.routers[http_method] = Router(routes)
 
-		# once all the methods have been found and sorted by http method,
-		# initialize their respective Routers, where they are sorted by priority
-		cls.routers = {
-			hm:Router(rlist)
-			for hm, rlist in found_routes.items()
-		}
-
-		# ends up looking like:
+		# so cls.routers ends up looking like:
 		# { 'GET': <Router instance>, 'POST': <Router instance>, ... }
 		# the Router instance sorts the routes internally, and selects from
 		# among them when handling a request.
@@ -91,10 +87,10 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 			method = self.routers[self.command](self.path_no_qs)
 			if method is None:
-				self.send_error(404, "no route matched '{0}'".format(self.command))
+				self.send_error(404, "no route matched '{0} {1}'".format(self.command, self.path_no_qs))
 				return
 
-			reply =  method(self) #getattr(self, name)()
+			reply = method(self)
 
 			# heh, this could be cleaned up but unfortunately im lazy but also
 			# appreciate fresh looking address bars at least in dev
@@ -208,3 +204,5 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 			self.send_header(h, v)
 		self.end_headers()
 		self.wfile.write(http_reply.body)
+
+__all__ = ['Handler']
